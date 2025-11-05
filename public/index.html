@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🎉 Kubernetes Pod Party</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            padding: 2rem;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 2rem;
+            animation: slideDown 0.6s ease-out;
+        }
+
+        .header h1 {
+            font-size: 3.5rem;
+            margin-bottom: 0.5rem;
+            text-shadow: 3px 3px 6px rgba(0,0,0,0.3);
+        }
+
+        .subtitle {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 2rem;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+            border: 1px solid rgba(255, 255, 255, 0.18);
+            animation: fadeIn 0.8s ease-out;
+        }
+
+        .pod-info {
+            grid-column: 1;
+        }
+
+        .qr-section {
+            grid-column: 2;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+        }
+
+        .pod-personality {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .pod-personality .emoji {
+            font-size: 5rem;
+            animation: bounce 2s infinite;
+        }
+
+        .pod-personality .mood {
+            font-size: 1.5rem;
+            margin: 1rem 0;
+            font-weight: bold;
+        }
+
+        .info-grid {
+            display: grid;
+            gap: 1rem;
+        }
+
+        .info-item {
+            background: rgba(0,0,0,0.2);
+            padding: 1rem;
+            border-radius: 10px;
+        }
+
+        .info-label {
+            font-size: 0.85rem;
+            opacity: 0.8;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 0.3rem;
+        }
+
+        .info-value {
+            font-size: 1.2rem;
+            font-weight: bold;
+            word-break: break-all;
+        }
+
+        .wisdom {
+            background: rgba(255, 255, 255, 0.25);
+            padding: 1.5rem;
+            border-radius: 15px;
+            margin-top: 1.5rem;
+            border-left: 5px solid rgba(255,255,255,0.5);
+            font-size: 1.1rem;
+            font-style: italic;
+            animation: fadeIn 1s ease-out;
+        }
+
+        .qr-code {
+            width: 280px;
+            height: 280px;
+            background: white;
+            border-radius: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 1rem 0;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+        }
+
+        .qr-placeholder {
+            width: 250px;
+            height: 250px;
+        }
+
+        .qr-instruction {
+            font-size: 1.3rem;
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+        }
+
+        .qr-description {
+            font-size: 0.95rem;
+            opacity: 0.9;
+            margin-top: 0.5rem;
+        }
+
+        .stats-bar {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            animation: fadeIn 1s ease-out;
+        }
+
+        .stat-card {
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 1.5rem;
+            text-align: center;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.2);
+        }
+
+        .stat-value {
+            font-size: 2.5rem;
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            opacity: 0.9;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+
+        @keyframes bounce {
+            0%, 100% {
+                transform: translateY(0);
+            }
+            50% {
+                transform: translateY(-20px);
+            }
+        }
+
+        .loading {
+            text-align: center;
+            font-size: 1.5rem;
+            padding: 3rem;
+        }
+
+        @media (max-width: 968px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+
+            .pod-info, .qr-section {
+                grid-column: 1;
+            }
+
+            .header h1 {
+                font-size: 2.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎉 Kubernetes Pod Party 🎉</h1>
+            <p class="subtitle">Where every pod has personality and every deployment tells a story</p>
+        </div>
+
+        <div id="content" class="loading">Loading the party... 🎊</div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
+    <script>
+        async function loadPodInfo() {
+            try {
+                const response = await fetch('/api/info');
+                const data = await response.json();
+
+                renderContent(data);
+
+                // Refresh wisdom every 8 seconds
+                setInterval(refreshWisdom, 8000);
+            } catch (error) {
+                document.getElementById('content').innerHTML =
+                    '<div class="card"><h2>😅 Oops! Could not load pod info</h2><p>Even Kubernetes has bad days...</p></div>';
+            }
+        }
+
+        async function refreshWisdom() {
+            try {
+                const response = await fetch('/api/info');
+                const data = await response.json();
+                const wisdomEl = document.querySelector('.wisdom');
+                if (wisdomEl) {
+                    wisdomEl.style.animation = 'none';
+                    setTimeout(() => {
+                        wisdomEl.textContent = data.wisdom;
+                        wisdomEl.style.animation = 'fadeIn 1s ease-out';
+                    }, 50);
+                }
+
+                // Update visit counter
+                const visitEl = document.getElementById('visit-count');
+                if (visitEl) {
+                    visitEl.textContent = data.stats.totalVisits;
+                }
+            } catch (error) {
+                console.error('Failed to refresh wisdom:', error);
+            }
+        }
+
+        function renderContent(data) {
+            const { pod, personality, wisdom, stats } = data;
+            const currentUrl = window.location.origin + '/vote';
+
+            const html = `
+                <div class="main-content">
+                    <div class="card pod-info">
+                        <div class="pod-personality">
+                            <div class="emoji">${personality.emoji}</div>
+                            <div class="mood">${personality.trait}</div>
+                            <p>Feeling: ${personality.mood}</p>
+                        </div>
+
+                        <div class="info-grid">
+                            <div class="info-item">
+                                <div class="info-label">Pod Name</div>
+                                <div class="info-value">${pod.name}</div>
+                            </div>
+                            <div class="info-item">
+                                <div class="info-label">Namespace</div>
+                                <div class="info-value">${pod.namespace}</div>
+                            </div>
+                            <div class="info-item">
+                                <div class="info-label">Node</div>
+                                <div class="info-value">${pod.nodeName}</div>
+                            </div>
+                            <div class="info-item">
+                                <div class="info-label">Pod IP</div>
+                                <div class="info-value">${pod.podIP}</div>
+                            </div>
+                        </div>
+
+                        <div class="wisdom">${wisdom}</div>
+                    </div>
+
+                    <div class="card qr-section">
+                        <div class="qr-instruction">📱 Scan to Join the Fun!</div>
+                        <div class="qr-code" id="qrcode"></div>
+                        <div class="qr-description">
+                            Vote for your biggest Kubernetes pain point<br/>
+                            and see live results!
+                        </div>
+                    </div>
+                </div>
+
+                <div class="stats-bar">
+                    <div class="stat-card">
+                        <div class="stat-value" id="visit-count">${stats.totalVisits}</div>
+                        <div class="stat-label">Total Visits</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value">${Math.floor(stats.uptime)}s</div>
+                        <div class="stat-label">Pod Uptime</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value">${(stats.memory.heapUsed / 1024 / 1024).toFixed(1)}MB</div>
+                        <div class="stat-label">Memory Used</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value">${pod.namespace}</div>
+                        <div class="stat-label">Living In</div>
+                    </div>
+                </div>
+            `;
+
+            document.getElementById('content').innerHTML = html;
+
+            // Generate QR code
+            new QRCode(document.getElementById('qrcode'), {
+                text: currentUrl,
+                width: 250,
+                height: 250,
+                colorDark: '#667eea',
+                colorLight: '#ffffff',
+                correctLevel: QRCode.CorrectLevel.H
+            });
+        }
+
+        // Load on page load
+        loadPodInfo();
+    </script>
+</body>
+</html>

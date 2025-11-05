@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🗳️ K8s Pain Point Vote</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            min-height: 100vh;
+            padding: 1.5rem;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 2rem;
+            animation: slideDown 0.6s ease-out;
+        }
+
+        .header h1 {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .subtitle {
+            font-size: 1rem;
+            opacity: 0.9;
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 2rem;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+            border: 1px solid rgba(255, 255, 255, 0.18);
+            margin-bottom: 1.5rem;
+        }
+
+        .pain-points {
+            display: grid;
+            gap: 1rem;
+        }
+
+        .pain-button {
+            background: rgba(255, 255, 255, 0.25);
+            border: 2px solid rgba(255, 255, 255, 0.4);
+            color: white;
+            padding: 1.2rem;
+            border-radius: 15px;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: left;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .pain-button:hover {
+            background: rgba(255, 255, 255, 0.35);
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+        }
+
+        .pain-button:active {
+            transform: translateY(0);
+        }
+
+        .pain-button.voted {
+            background: rgba(76, 175, 80, 0.4);
+            border-color: rgba(76, 175, 80, 0.6);
+        }
+
+        .vote-count {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 0.4rem 0.8rem;
+            border-radius: 20px;
+            font-weight: bold;
+            min-width: 50px;
+            text-align: center;
+        }
+
+        .results-section {
+            display: none;
+        }
+
+        .results-section.show {
+            display: block;
+            animation: fadeIn 0.6s ease-out;
+        }
+
+        .result-bar-container {
+            margin-bottom: 1.2rem;
+        }
+
+        .result-label {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.5rem;
+            font-size: 0.95rem;
+        }
+
+        .result-bar {
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 10px;
+            height: 30px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .result-fill {
+            background: linear-gradient(90deg, #4CAF50, #8BC34A);
+            height: 100%;
+            border-radius: 10px;
+            transition: width 0.6s ease-out;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            padding-right: 10px;
+            min-width: 40px;
+        }
+
+        .success-message {
+            text-align: center;
+            padding: 1rem;
+            background: rgba(76, 175, 80, 0.3);
+            border-radius: 15px;
+            margin-bottom: 1rem;
+            display: none;
+        }
+
+        .success-message.show {
+            display: block;
+            animation: fadeIn 0.4s ease-out;
+        }
+
+        .refresh-btn {
+            background: rgba(255, 255, 255, 0.25);
+            border: 2px solid rgba(255, 255, 255, 0.4);
+            color: white;
+            padding: 1rem 2rem;
+            border-radius: 15px;
+            font-size: 1.1rem;
+            cursor: pointer;
+            width: 100%;
+            transition: all 0.3s ease;
+            margin-top: 1rem;
+        }
+
+        .refresh-btn:hover {
+            background: rgba(255, 255, 255, 0.35);
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+
+        .footer {
+            text-align: center;
+            margin-top: 2rem;
+            opacity: 0.8;
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🗳️ What's Your Biggest K8s Pain?</h1>
+            <p class="subtitle">We've all been there... now let's commiserate together</p>
+        </div>
+
+        <div id="success-message" class="success-message">
+            ✅ Vote recorded! Thanks for sharing your pain 😅
+        </div>
+
+        <div class="card">
+            <div class="pain-points">
+                <button class="pain-button" onclick="vote('yaml-indentation')">
+                    <span>😤 YAML Indentation Hell</span>
+                    <span class="vote-count" data-pain="yaml-indentation">0</span>
+                </button>
+                <button class="pain-button" onclick="vote('crashloopbackoff')">
+                    <span>🔄 CrashLoopBackOff Mysteries</span>
+                    <span class="vote-count" data-pain="crashloopbackoff">0</span>
+                </button>
+                <button class="pain-button" onclick="vote('resource-limits')">
+                    <span>💾 Resource Limits Guessing Game</span>
+                    <span class="vote-count" data-pain="resource-limits">0</span>
+                </button>
+                <button class="pain-button" onclick="vote('networking')">
+                    <span>🕸️ Networking & Service Mesh</span>
+                    <span class="vote-count" data-pain="networking">0</span>
+                </button>
+                <button class="pain-button" onclick="vote('rbac')">
+                    <span>🔐 RBAC Permission Puzzles</span>
+                    <span class="vote-count" data-pain="rbac">0</span>
+                </button>
+                <button class="pain-button" onclick="vote('storage')">
+                    <span>💿 Persistent Storage Struggles</span>
+                    <span class="vote-count" data-pain="storage">0</span>
+                </button>
+            </div>
+
+            <button class="refresh-btn" onclick="loadVotes()">🔄 Refresh Results</button>
+        </div>
+
+        <div id="results" class="card results-section">
+            <h2 style="margin-bottom: 1.5rem; text-align: center;">📊 Live Results</h2>
+            <div id="results-container"></div>
+        </div>
+
+        <div class="footer">
+            Made with ❤️ and kubectl apply -f tears.yaml
+        </div>
+    </div>
+
+    <script>
+        let hasVoted = localStorage.getItem('k8s-vote') !== null;
+        let userVote = localStorage.getItem('k8s-vote');
+
+        const painLabels = {
+            'yaml-indentation': '😤 YAML Indentation Hell',
+            'crashloopbackoff': '🔄 CrashLoopBackOff Mysteries',
+            'resource-limits': '💾 Resource Limits Guessing Game',
+            'networking': '🕸️ Networking & Service Mesh',
+            'rbac': '🔐 RBAC Permission Puzzles',
+            'storage': '💿 Persistent Storage Struggles'
+        };
+
+        async function vote(painPoint) {
+            if (hasVoted) {
+                alert('You already voted! But feel free to refresh to see updated results 😊');
+                return;
+            }
+
+            try {
+                const response = await fetch('/api/vote', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ painPoint })
+                });
+
+                if (response.ok) {
+                    hasVoted = true;
+                    userVote = painPoint;
+                    localStorage.setItem('k8s-vote', painPoint);
+
+                    // Show success message
+                    document.getElementById('success-message').classList.add('show');
+
+                    // Mark button as voted
+                    event.target.closest('.pain-button').classList.add('voted');
+
+                    // Load and show results
+                    await loadVotes();
+                    document.getElementById('results').classList.add('show');
+
+                    setTimeout(() => {
+                        document.getElementById('success-message').classList.remove('show');
+                    }, 3000);
+                }
+            } catch (error) {
+                alert('😅 Oops! Failed to record vote. Even our voting has bugs!');
+            }
+        }
+
+        async function loadVotes() {
+            try {
+                const response = await fetch('/api/votes');
+                const votes = await response.json();
+
+                // Update vote counts on buttons
+                Object.keys(votes).forEach(pain => {
+                    const countEl = document.querySelector(`[data-pain="${pain}"]`);
+                    if (countEl) {
+                        countEl.textContent = votes[pain];
+                    }
+                });
+
+                // Show results if user has voted
+                if (hasVoted) {
+                    displayResults(votes);
+                    document.getElementById('results').classList.add('show');
+                }
+            } catch (error) {
+                console.error('Failed to load votes:', error);
+            }
+        }
+
+        function displayResults(votes) {
+            const total = Object.values(votes).reduce((sum, count) => sum + count, 0);
+
+            if (total === 0) {
+                document.getElementById('results-container').innerHTML =
+                    '<p style="text-align: center; opacity: 0.8;">No votes yet. Be the first!</p>';
+                return;
+            }
+
+            const sortedVotes = Object.entries(votes)
+                .sort((a, b) => b[1] - a[1])
+                .map(([pain, count]) => {
+                    const percentage = total > 0 ? (count / total * 100).toFixed(1) : 0;
+                    return { pain, count, percentage };
+                });
+
+            const html = sortedVotes.map(({ pain, count, percentage }) => `
+                <div class="result-bar-container">
+                    <div class="result-label">
+                        <span>${painLabels[pain]}</span>
+                        <span>${count} votes</span>
+                    </div>
+                    <div class="result-bar">
+                        <div class="result-fill" style="width: ${percentage}%">
+                            <strong>${percentage}%</strong>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+
+            document.getElementById('results-container').innerHTML = html;
+        }
+
+        // Mark user's vote on load
+        if (hasVoted && userVote) {
+            document.addEventListener('DOMContentLoaded', () => {
+                const buttons = document.querySelectorAll('.pain-button');
+                buttons.forEach(btn => {
+                    if (btn.onclick.toString().includes(userVote)) {
+                        btn.classList.add('voted');
+                    }
+                });
+            });
+        }
+
+        // Load votes on page load
+        loadVotes();
+
+        // Auto-refresh every 5 seconds
+        setInterval(loadVotes, 5000);
+    </script>
+</body>
+</html>

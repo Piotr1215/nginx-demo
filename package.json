@@ -1,0 +1,23 @@
+{
+  "name": "k8s-pod-party",
+  "version": "2.0.0",
+  "description": "Interactive Kubernetes demo for conference talks",
+  "main": "app.js",
+  "scripts": {
+    "start": "node app.js",
+    "dev": "nodemon app.js"
+  },
+  "keywords": [
+    "kubernetes",
+    "demo",
+    "conference"
+  ],
+  "author": "Piotr",
+  "license": "MIT",
+  "dependencies": {
+    "express": "^4.18.2"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.1"
+  }
+}
