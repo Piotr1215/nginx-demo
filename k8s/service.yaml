@@ -1,0 +1,18 @@
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: vcluster-control-tower
+  namespace: default
+  labels:
+    app: vcluster-control-tower
+spec:
+  type: LoadBalancer
+  selector:
+    app: vcluster-control-tower
+  ports:
+    - name: http
+      port: 80
+      targetPort: http
+      protocol: TCP
+  sessionAffinity: ClientIP

@@ -1,0 +1,30 @@
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: vcluster-control-tower
+  namespace: default
+  labels:
+    app: vcluster-control-tower
+  annotations:
+    # Uncomment and configure based on your ingress controller
+    # nginx.ingress.kubernetes.io/rewrite-target: /
+    # cert-manager.io/cluster-issuer: letsencrypt-prod
+spec:
+  ingressClassName: nginx  # Change based on your ingress controller
+  rules:
+    - host: vcluster-demo.example.com  # Change to your domain
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: vcluster-control-tower
+                port:
+                  name: http
+  # Uncomment for TLS
+  # tls:
+  #   - hosts:
+  #       - vcluster-demo.example.com
+  #     secretName: vcluster-demo-tls

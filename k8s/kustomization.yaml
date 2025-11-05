@@ -1,0 +1,29 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: default
+
+resources:
+  - rbac.yaml
+  - deployment.yaml
+  - service.yaml
+  # Uncomment to enable ingress
+  # - ingress.yaml
+
+labels:
+  - pairs:
+      app.kubernetes.io/name: vcluster-control-tower
+      app.kubernetes.io/version: v2.0.0
+      app.kubernetes.io/component: dashboard
+      app.kubernetes.io/part-of: kubernetes-demos
+
+images:
+  - name: your-registry/vcluster-control-tower
+    newName: your-registry/vcluster-control-tower
+    newTag: v2.0.0
+
+# ConfigMap generator for environment variables (optional)
+# configMapGenerator:
+#   - name: app-config
+#     literals:
+#       - NODE_ENV=production

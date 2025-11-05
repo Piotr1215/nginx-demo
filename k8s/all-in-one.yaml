@@ -1,0 +1,163 @@
+---
+# ServiceAccount for the application
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: vcluster-control-tower
+  namespace: default
+  labels:
+    app: vcluster-control-tower
+---
+# ClusterRole with read permissions
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: vcluster-control-tower-reader
+  labels:
+    app: vcluster-control-tower
+rules:
+  # Read cluster information
+  - apiGroups: [""]
+    resources:
+      - nodes
+      - namespaces
+      - pods
+      - services
+    verbs:
+      - get
+      - list
+      - watch
+
+  # Read StatefulSets (for vcluster detection)
+  - apiGroups: ["apps"]
+    resources:
+      - statefulsets
+    verbs:
+      - get
+      - list
+      - watch
+
+  # Access to cluster version
+  - nonResourceURLs:
+      - /version
+    verbs:
+      - get
+---
+# ClusterRoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: vcluster-control-tower-reader
+  labels:
+    app: vcluster-control-tower
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: vcluster-control-tower-reader
+subjects:
+  - kind: ServiceAccount
+    name: vcluster-control-tower
+    namespace: default
+---
+# Deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: vcluster-control-tower
+  namespace: default
+  labels:
+    app: vcluster-control-tower
+    version: v2.0.0
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: vcluster-control-tower
+  template:
+    metadata:
+      labels:
+        app: vcluster-control-tower
+        version: v2.0.0
+    spec:
+      serviceAccountName: vcluster-control-tower
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1001
+        fsGroup: 1001
+      containers:
+        - name: app
+          image: your-registry/vcluster-control-tower:v2.0.0
+          imagePullPolicy: Always
+          ports:
+            - name: http
+              containerPort: 3000
+              protocol: TCP
+          env:
+            - name: PORT
+              value: "3000"
+            - name: NODE_ENV
+              value: "production"
+            - name: POD_NAMESPACE
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.namespace
+            - name: HOSTNAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+          livenessProbe:
+            httpGet:
+              path: /api/health
+              port: http
+            initialDelaySeconds: 10
+            periodSeconds: 30
+            timeoutSeconds: 5
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /api/health
+              port: http
+            initialDelaySeconds: 5
+            periodSeconds: 10
+            timeoutSeconds: 3
+            failureThreshold: 3
+          resources:
+            requests:
+              memory: "128Mi"
+              cpu: "100m"
+            limits:
+              memory: "256Mi"
+              cpu: "500m"
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            runAsNonRoot: true
+            runAsUser: 1001
+            capabilities:
+              drop:
+                - ALL
+          volumeMounts:
+            - name: tmp
+              mountPath: /tmp
+      volumes:
+        - name: tmp
+          emptyDir: {}
+---
+# Service
+apiVersion: v1
+kind: Service
+metadata:
+  name: vcluster-control-tower
+  namespace: default
+  labels:
+    app: vcluster-control-tower
+spec:
+  type: LoadBalancer
+  selector:
+    app: vcluster-control-tower
+  ports:
+    - name: http
+      port: 80
+      targetPort: http
+      protocol: TCP
+  sessionAffinity: ClientIP

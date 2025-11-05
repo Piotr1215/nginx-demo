@@ -1,0 +1,57 @@
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: vcluster-control-tower
+  namespace: default
+  labels:
+    app: vcluster-control-tower
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: vcluster-control-tower-reader
+  labels:
+    app: vcluster-control-tower
+rules:
+  # Read cluster information
+  - apiGroups: [""]
+    resources:
+      - nodes
+      - namespaces
+      - pods
+      - services
+    verbs:
+      - get
+      - list
+      - watch
+
+  # Read StatefulSets (for vcluster detection)
+  - apiGroups: ["apps"]
+    resources:
+      - statefulsets
+    verbs:
+      - get
+      - list
+      - watch
+
+  # Access to cluster version
+  - nonResourceURLs:
+      - /version
+    verbs:
+      - get
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: vcluster-control-tower-reader
+  labels:
+    app: vcluster-control-tower
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: vcluster-control-tower-reader
+subjects:
+  - kind: ServiceAccount
+    name: vcluster-control-tower
+    namespace: default

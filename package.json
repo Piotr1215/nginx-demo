@@ -1,0 +1,24 @@
+{
+  "name": "vcluster-control-tower",
+  "version": "2.0.0",
+  "description": "Interactive Kubernetes and vCluster visualization dashboard for demos",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "nodemon server.js"
+  },
+  "keywords": ["kubernetes", "vcluster", "dashboard", "demo"],
+  "author": "Piotr",
+  "license": "MIT",
+  "dependencies": {
+    "express": "^4.18.2",
+    "kubernetes-client": "^10.1.0",
+    "compression": "^1.7.4"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.2"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
