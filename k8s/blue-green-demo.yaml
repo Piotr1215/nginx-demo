@@ -1,0 +1,141 @@
+# Blue-Green Deployment Demo
+# This shows two versions running simultaneously
+# Switch traffic by updating Service selector
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: pod-inspector-green
+  namespace: pod-inspector
+  labels:
+    app: pod-inspector
+    version: green
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: pod-inspector
+      version: green
+  template:
+    metadata:
+      labels:
+        app: pod-inspector
+        version: green
+    spec:
+      serviceAccountName: pod-inspector
+      containers:
+        - name: pod-inspector
+          image: piotr1215/pod-inspector:v1.0.0
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8080
+              name: http
+          env:
+            - name: POD_NAMESPACE
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.namespace
+            - name: POD_IP
+              valueFrom:
+                fieldRef:
+                  fieldPath: status.podIP
+            - name: NODE_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: spec.nodeName
+            - name: HOST_IP
+              valueFrom:
+                fieldRef:
+                  fieldPath: status.hostIP
+            - name: SERVICE_ACCOUNT
+              valueFrom:
+                fieldRef:
+                  fieldPath: spec.serviceAccountName
+            - name: APP_VERSION
+              value: "v1.0.0-green"
+          resources:
+            requests:
+              cpu: 100m
+              memory: 64Mi
+            limits:
+              cpu: 200m
+              memory: 128Mi
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: pod-inspector-blue
+  namespace: pod-inspector
+  labels:
+    app: pod-inspector
+    version: blue
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: pod-inspector
+      version: blue
+  template:
+    metadata:
+      labels:
+        app: pod-inspector
+        version: blue
+    spec:
+      serviceAccountName: pod-inspector
+      containers:
+        - name: pod-inspector
+          image: piotr1215/pod-inspector:v2.0.0
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8080
+              name: http
+          env:
+            - name: POD_NAMESPACE
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.namespace
+            - name: POD_IP
+              valueFrom:
+                fieldRef:
+                  fieldPath: status.podIP
+            - name: NODE_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: spec.nodeName
+            - name: HOST_IP
+              valueFrom:
+                fieldRef:
+                  fieldPath: status.hostIP
+            - name: SERVICE_ACCOUNT
+              valueFrom:
+                fieldRef:
+                  fieldPath: spec.serviceAccountName
+            - name: APP_VERSION
+              value: "v2.0.0-blue"
+          resources:
+            requests:
+              cpu: 100m
+              memory: 64Mi
+            limits:
+              cpu: 200m
+              memory: 128Mi
+---
+# Service - Switch between green and blue by changing the selector
+apiVersion: v1
+kind: Service
+metadata:
+  name: pod-inspector-bg
+  namespace: pod-inspector
+  labels:
+    app: pod-inspector
+spec:
+  type: LoadBalancer
+  selector:
+    app: pod-inspector
+    version: green  # Change to 'blue' to switch traffic
+  ports:
+    - port: 80
+      targetPort: 8080
+      protocol: TCP
+      name: http

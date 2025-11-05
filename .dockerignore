@@ -1,0 +1,32 @@
+# Git
+.git
+.gitignore
+
+# Documentation
+*.md
+README.md
+LICENSE
+
+# Kubernetes manifests
+k8s/
+*.yaml
+
+# Development files
+Makefile
+.vscode/
+.idea/
+
+# Build artifacts
+pod-inspector
+*.exe
+
+# Old nginx demo files (not needed for Go build)
+demo.conf
+index.html
+blue/
+Dockerfile
+Dockerfile.blue
+
+# CI/CD
+.github/
+renovate.json

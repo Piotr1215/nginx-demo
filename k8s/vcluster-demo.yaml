@@ -1,0 +1,128 @@
+# VCluster Demo Setup
+# This demonstrates pod-inspector running in a virtual cluster
+#
+# Prerequisites:
+# 1. Install vcluster CLI: https://www.vcluster.com/docs/getting-started/setup
+# 2. Create a vcluster: vcluster create my-vcluster -n vcluster-demo
+# 3. Deploy pod-inspector in the vcluster
+#
+# The pod-inspector will detect it's running in a vCluster and show both
+# vCluster and host cluster information
+
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: vcluster-demo
+---
+# Deploy the pod-inspector in a vCluster context
+# After creating vcluster, connect to it and apply this:
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: pod-inspector
+  namespace: default
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: pod-inspector
+rules:
+  - apiGroups: [""]
+    resources: ["pods", "nodes", "namespaces"]
+    verbs: ["get", "list", "watch"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: pod-inspector
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: pod-inspector
+subjects:
+  - kind: ServiceAccount
+    name: pod-inspector
+    namespace: default
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: pod-inspector-vcluster
+  namespace: default
+  labels:
+    app: pod-inspector
+    demo: vcluster
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: pod-inspector
+  template:
+    metadata:
+      labels:
+        app: pod-inspector
+        demo: vcluster
+    spec:
+      serviceAccountName: pod-inspector
+      containers:
+        - name: pod-inspector
+          image: piotr1215/pod-inspector:latest
+          ports:
+            - containerPort: 8080
+          env:
+            - name: POD_NAMESPACE
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.namespace
+            - name: POD_IP
+              valueFrom:
+                fieldRef:
+                  fieldPath: status.podIP
+            - name: NODE_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: spec.nodeName
+            - name: HOST_IP
+              valueFrom:
+                fieldRef:
+                  fieldPath: status.hostIP
+            - name: APP_VERSION
+              value: "v1.0.0-vcluster"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: pod-inspector
+  namespace: default
+spec:
+  type: LoadBalancer
+  selector:
+    app: pod-inspector
+  ports:
+    - port: 80
+      targetPort: 8080
+---
+# Instructions for demo:
+#
+# 1. Create vcluster in host cluster:
+#    vcluster create demo-cluster -n vcluster-demo --expose
+#
+# 2. Connect to vcluster:
+#    vcluster connect demo-cluster -n vcluster-demo
+#
+# 3. Deploy pod-inspector:
+#    kubectl apply -f vcluster-demo.yaml
+#
+# 4. Access the service and observe:
+#    - Pod will show vCluster labels/annotations
+#    - Will display it's running in a virtual cluster
+#    - Shows both vCluster and host cluster node count
+#
+# 5. Compare with host cluster deployment:
+#    kubectl apply -f deployment.yaml --context=<host-cluster-context>
+#
+# This creates a powerful demo showing:
+# - Multi-tenancy isolation
+# - Different cluster perspectives
+# - How vCluster enables cluster-as-a-service
