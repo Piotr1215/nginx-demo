@@ -1,4 +1,4 @@
-FROM nginx:1.29.4-alpine
+FROM nginx:1.29.5-alpine
 RUN rm /etc/nginx/conf.d/*
 ADD demo.conf /etc/nginx/conf.d/
 ADD /blue/index.html /usr/share/nginx/html/
